@@ -41,6 +41,18 @@ const showCity = (input, list) => {
             return fixItem.includes(input.value.toLowerCase());   
     });
     
+    //сортировка городов
+    filterCity.sort(function (a, b) {
+        if (a.name > b.name) {
+          return 1;
+        }
+        if (a.name < b.name) {
+          return -1;
+        }
+        // a должно быть равным b
+        return 0;
+      });
+
     filterCity.forEach((item)=>{
         const li = document.createElement('li');
         li.classList.add('dropdown__city'); //добавить класс элементу
@@ -81,6 +93,12 @@ const renderCheapDay = (cheapTicket) => {
     };
 
 const renderCheapYear = (cheapTickets) => {
+
+    //сортировка по возрастанию цены
+    cheapTickets.sort((a,b) => {
+        return a.value - b.value;
+    });
+
 	console.log('cheapTickets: ', cheapTickets);
     };
 
