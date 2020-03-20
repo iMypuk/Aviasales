@@ -6,10 +6,8 @@ const formSearch = document.querySelector('.form-search'),
     inputDateDepart = document.querySelector('.input__date-depart');
 
 const citiesApi = 'database/cities.json',
-    proxy = 'https://cors-anywhere.herokuapp.com/',
     API_KEY = 'd2a30638d906c66ecbb5ab2dbc31375e',
-    calendar = 'http://min-prices.aviasales.ru/calendar_preload',
-    queryIATA = 'https://www.travelpayouts.com/widgets_suggest_params?q=Из Екатеринбурга в Калининград'; // запрос для получения IATA кодов
+    calendar = 'http://min-prices.aviasales.ru/calendar_preload';
 
 let city = [];
 
@@ -51,6 +49,14 @@ const showCity = (input, list) => {
     });
 };
 
+const cheapTicketDay = (cheapTicket) =>{
+    console.log(cheapTicket);
+};
+
+const cheapTicketYear = (cheapTickets) =>{
+    console.log(cheapTickets);
+};
+
 const selectCity = (event, input, list) => {
     const target = event.target;
     if(target.tagName.toLowerCase() === 'li'){
@@ -58,6 +64,25 @@ const selectCity = (event, input, list) => {
         list.textContent='';
     }
 }
+
+const renderCheap = (data, date) => {
+    const cheapTicketYear = JSON.parse(data).best_prices;
+
+    const cheapTicketDay = cheapTicketYear.filter((item) => {
+        return item.depart_date === date;
+    });
+
+    renderCheapDay(cheapTicketDay);
+    renderCheapYear(cheapTicketYear);
+}
+
+const renderCheapDay = (cheapTicket) => {
+    console.log('cheapTicket: ', cheapTicket)
+    };
+
+const renderCheapYear = (cheapTickets) => {
+	console.log('cheapTickets: ', cheapTickets);
+    };
 
 //листенер для поля "откуда"
 inputCitiesFrom.addEventListener('input', () => {
@@ -79,7 +104,27 @@ dropdownCitiesTo.addEventListener('click', (event)=>{
     selectCity(event, inputCitiesTo, dropdownCitiesTo);
 });
 
-//вызовы функций
+// обработка кнопки
+formSearch.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+	const cityFrom = city.find(item => inputCitiesFrom.value === item.name);
+	const cityTo = city.find(item => inputCitiesTo.value === item.name);
+
+    const formData = {
+        from: cityFrom.code,
+        to: cityTo.code,
+        when: inputDateDepart.value
+    };
+    
+    //для формирования запроса используем обратные кавычки
+    const requestData = `?depart_date=${formData.when}&origin=${formData.from}&destination=${formData.to}&one_way=true&token=${API_KEY}`;
+
+   getData(calendar + requestData, (response) => {
+       renderCheap(response, formData.when)
+   });
+
+});
 
 getData(citiesApi, (data)=>{
     city = JSON.parse(data).filter(item => item.name);
@@ -90,22 +135,3 @@ getData(citiesApi, (data)=>{
 }
 */
 
-
-// через Live Server
-getData(queryIATA, (data)=>{
-    let jsonText = JSON.parse(data); 
-    let origin = jsonText['origin']['iata']; // место вылета
-    let destination = jsonText['destination']['iata']; // место назначения
-
-    console.log('Код города отправления: ' + origin);
-    console.log('Код города назначения: ' + destination);
-
-    let params = ('?origin=' + origin + '&destination=' + destination + '&depart_date=2020-05-25'); 
-    console.log('Сформированный запрос: ' + calendar+params);
-    console.log('Ответ:');
-    getData(calendar+params, (data)=>{
-        let result = JSON.parse(data);
-        console.log(result);
-    });
-
-});
